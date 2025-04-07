@@ -1,5 +1,6 @@
 package com.taylor.common.security.filter;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.taylor.common.web.constant.WebConstant;
 import com.taylor.common.web.domain.HttpStatus;
 import com.taylor.common.web.domain.Result;
@@ -37,13 +38,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         // 获取 Authorization 头
-        String tokenHeader = request.getHeader(WebConstant.AUTH_TOKEN_HEADER);
+        String token = request.getHeader(WebConstant.AUTH_TOKEN_HEADER);
         // 检查 JWT 令牌格式
-        if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")) {
+        if (CharSequenceUtil.isEmpty(token)) {
             filterChain.doFilter(request, response);
             return;
         }
-        String token = tokenHeader.replace("Bearer ", "");
         // 验证令牌失败
         if (!jwtProvider.validateToken(token)) {
             ResponseToolKit.sendJsonErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
