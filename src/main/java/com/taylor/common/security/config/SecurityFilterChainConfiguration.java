@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * @author loveCamille
  * @date 2025-04-07 14:13:15
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class SecurityFilterChainConfiguration {
 
     @Bean

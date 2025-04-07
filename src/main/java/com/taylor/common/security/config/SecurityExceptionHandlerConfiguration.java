@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * @author loveCamille
  * @date 2025-04-07 14:17:06
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class SecurityExceptionHandlerConfiguration {
 
     @Bean

@@ -14,7 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
  * @author loveCamille
  * @date 2025-04-05 17:51:55
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class PermissionChangeListenerConfiguration {
 
     @Bean
@@ -28,16 +28,26 @@ public class PermissionChangeListenerConfiguration {
         return new PermissionChangeEventListener(permissionLoader);
     }
 
-    @Bean
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(KafkaTemplate.class)
-    public KafkaPermissionChangeListener kafkaPermissionChangeListener(PermissionLoader permissionLoader) {
-        return new KafkaPermissionChangeListener(permissionLoader);
+    public static class KafkaPermissionChangeListenerConfiguration {
+
+        @Bean
+        public KafkaPermissionChangeListener kafkaPermissionChangeListener(PermissionLoader permissionLoader) {
+            return new KafkaPermissionChangeListener(permissionLoader);
+        }
+
     }
 
-    @Bean
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(RabbitTemplate.class)
-    public RabbitPermissionChangeListener rabbitPermissionChangeListener(PermissionLoader permissionLoader) {
-        return new RabbitPermissionChangeListener(permissionLoader);
+    public static class RabbitPermissionChangeListenerConfiguration {
+
+        @Bean
+        public RabbitPermissionChangeListener rabbitPermissionChangeListener(PermissionLoader permissionLoader) {
+            return new RabbitPermissionChangeListener(permissionLoader);
+        }
+
     }
 
 }

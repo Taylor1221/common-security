@@ -16,7 +16,7 @@ import org.springframework.security.web.access.intercept.FilterSecurityIntercept
  * @author loveCamille
  * @date 2025-04-07 14:15:45
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(PermissionSourceService.class)
 public class DynamicPermissionConfiguration {
 

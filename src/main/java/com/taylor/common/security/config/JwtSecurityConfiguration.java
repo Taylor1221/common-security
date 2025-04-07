@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * @author loveCamille
  * @date 2025-04-07 14:14:46
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class JwtSecurityConfiguration {
 
     @Bean
