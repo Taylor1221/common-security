@@ -1,0 +1,64 @@
+package com.taylor.common.security.filter;
+
+import com.taylor.common.web.constant.WebConstant;
+import com.taylor.common.web.domain.HttpStatus;
+import com.taylor.common.web.domain.Result;
+import com.taylor.common.jwt.JwtProvider;
+import com.taylor.common.security.support.ResponseToolKit;
+import lombok.AllArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+/**
+ * JWT 认证过滤器
+ *
+ * @author loveCamille
+ * @date 2025-04-02 21:17:26
+ */
+@AllArgsConstructor
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private JwtProvider jwtProvider;
+
+    private UserDetailsService userDetailsService;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        // 获取 Authorization 头
+        String tokenHeader = request.getHeader(WebConstant.AUTH_TOKEN_HEADER);
+        // 检查 JWT 令牌格式
+        if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        String token = tokenHeader.replace("Bearer ", "");
+        // 验证令牌失败
+        if (!jwtProvider.validateToken(token)) {
+            ResponseToolKit.sendJsonErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    Result.reply(HttpStatus.BaseHttpStatus.UNAUTHORIZED));
+            return;
+        }
+
+        String username = jwtProvider.getUsername(token);
+        // 加载用户信息
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        // 设置身份信息
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        filterChain.doFilter(request, response);
+    }
+}
