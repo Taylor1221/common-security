@@ -3,7 +3,7 @@ package com.taylor.common.security.config;
 import com.taylor.common.security.filter.JwtAuthenticationFilter;
 import com.taylor.common.security.handler.RestfulAccessDeniedHandler;
 import com.taylor.common.security.handler.RestfulAuthenticationEntryPoint;
-import com.taylor.common.security.properties.AuthProperties;
+import com.taylor.common.security.properties.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,11 +28,11 @@ public class SecurityFilterChainConfiguration {
                                            RestfulAccessDeniedHandler restfulAccessDeniedHandler,
                                            RestfulAuthenticationEntryPoint restfulAuthenticationEntryPoint,
                                            FilterSecurityInterceptor dynamicSecurityFilter,
-                                           AuthProperties authProperties) throws Exception {
+                                           SecurityProperties securityProperties) throws Exception {
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry = httpSecurity
                 .authorizeRequests();
 
-        registry.antMatchers(authProperties.getIgnoreUrls().toArray(new String[0])) // 白名单的资源路径允许访问
+        registry.antMatchers(securityProperties.getIgnoreUrls().toArray(new String[0])) // 白名单的资源路径允许访问
                 .permitAll()
                 .antMatchers(HttpMethod.OPTIONS) // 允许跨域请求的OPTIONS请求
                 .permitAll()

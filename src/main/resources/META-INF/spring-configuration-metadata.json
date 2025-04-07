@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "common.security",
+      "type": "com.taylor.common.security.properties.SecurityProperties",
+      "sourceType": "com.taylor.common.security.properties.SecurityProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "common.security.ignore-urls",
+      "type": "java.util.List<java.lang.String>",
+      "description": "白名单链接",
+      "sourceType": "com.taylor.common.security.properties.SecurityProperties"
+    }
+  ]
+}

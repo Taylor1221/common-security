@@ -1,7 +1,7 @@
 package com.taylor.common.security;
 
 import com.taylor.common.security.config.*;
-import com.taylor.common.security.properties.AuthProperties;
+import com.taylor.common.security.properties.SecurityProperties;
 import com.taylor.common.security.service.PermissionSourceService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(PermissionSourceService.class)
-@EnableConfigurationProperties(AuthProperties.class)
+@EnableConfigurationProperties(SecurityProperties.class)
 @Import({
         SecurityFilterChainConfiguration.class,
         JwtSecurityConfiguration.class,

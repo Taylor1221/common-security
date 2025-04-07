@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,12 +15,12 @@ import java.util.List;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "common.auth")
-public class AuthProperties {
+@ConfigurationProperties(prefix = "common.security")
+public class SecurityProperties {
 
     /**
      * 白名单链接
      */
-    private List<String> ignoreUrls;
+    private List<String> ignoreUrls = new ArrayList<>();
 
 }
