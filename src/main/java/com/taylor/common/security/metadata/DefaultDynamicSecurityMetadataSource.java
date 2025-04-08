@@ -79,10 +79,9 @@ public class DefaultDynamicSecurityMetadataSource implements DynamicSecurityMeta
         // 在白名单中，不需要任何权限
         if (whiteListChecker.isWhiteListed(request)) return Collections.emptyList();
         return permissionMap.entrySet().stream()
-                .filter(entry -> entry.getKey().matches(request)) // 直接使用预编译的 `AntPathRequestMatcher`
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(Collections.emptyList());
+                .filter(entry -> entry.getKey().matches(request))
+                .flatMap(entry -> entry.getValue().stream())
+                .collect(Collectors.toSet());
     }
 
     @Override
