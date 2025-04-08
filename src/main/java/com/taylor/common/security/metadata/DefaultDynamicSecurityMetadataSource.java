@@ -3,6 +3,7 @@ package com.taylor.common.security.metadata;
 import com.taylor.common.security.constant.PermissionType;
 import com.taylor.common.security.model.PermissionRule;
 import com.taylor.common.security.service.PermissionSourceService;
+import com.taylor.common.security.white.WhiteListChecker;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,6 +34,8 @@ public class DefaultDynamicSecurityMetadataSource implements DynamicSecurityMeta
     private final Map<AntPathRequestMatcher, Collection<ConfigAttribute>> permissionMap = new ConcurrentHashMap<>();
 
     private final PermissionSourceService permissionSourceService;
+
+    private final WhiteListChecker whiteListChecker;
 
     /**
      * 加载权限并组装
@@ -73,6 +76,8 @@ public class DefaultDynamicSecurityMetadataSource implements DynamicSecurityMeta
     @Override
     public Collection<ConfigAttribute> getAttributes(Object object) {
         HttpServletRequest request = ((FilterInvocation) object).getRequest();
+        // 在白名单中，不需要任何权限
+        if (whiteListChecker.isWhiteListed(request)) return Collections.emptyList();
         return permissionMap.entrySet().stream()
                 .filter(entry -> entry.getKey().matches(request)) // 直接使用预编译的 `AntPathRequestMatcher`
                 .map(Map.Entry::getValue)

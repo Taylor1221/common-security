@@ -4,11 +4,13 @@ import com.taylor.common.security.manager.DynamicAccessDecisionManager;
 import com.taylor.common.security.metadata.DefaultDynamicSecurityMetadataSource;
 import com.taylor.common.security.metadata.DynamicSecurityMetadataSource;
 import com.taylor.common.security.service.PermissionSourceService;
+import com.taylor.common.security.white.AntPathWhiteListChecker;
+import com.taylor.common.security.white.SecurityProperties;
+import com.taylor.common.security.white.WhiteListChecker;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 
 /**
  * 权限相关配置类（动态权限）
@@ -21,9 +23,16 @@ import org.springframework.security.web.access.intercept.FilterSecurityIntercept
 public class DynamicPermissionConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean(WhiteListChecker.class)
+    public WhiteListChecker whiteListChecker(SecurityProperties properties) {
+        return new AntPathWhiteListChecker(properties);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(DynamicSecurityMetadataSource.class)
-    public DynamicSecurityMetadataSource dynamicSecurityMetadataSource(PermissionSourceService permissionSourceService) {
-        return new DefaultDynamicSecurityMetadataSource(permissionSourceService);
+    public DynamicSecurityMetadataSource dynamicSecurityMetadataSource(PermissionSourceService permissionSourceService,
+                                                                       WhiteListChecker whiteListChecker) {
+        return new DefaultDynamicSecurityMetadataSource(permissionSourceService, whiteListChecker);
     }
 
     @Bean
@@ -32,12 +41,9 @@ public class DynamicPermissionConfiguration {
     }
 
     @Bean
-    public FilterSecurityInterceptor dynamicFilterSecurityInterceptor(DynamicSecurityMetadataSource metadataSource,
+    public FilterSecurityInterceptorPostProcessor filterSecurityInterceptorPostProcessor(DynamicSecurityMetadataSource metadataSource,
                                                                       DynamicAccessDecisionManager accessDecisionManager) {
-        FilterSecurityInterceptor interceptor = new FilterSecurityInterceptor();
-        interceptor.setSecurityMetadataSource(metadataSource);
-        interceptor.setAccessDecisionManager(accessDecisionManager);
-        return interceptor;
+        return new FilterSecurityInterceptorPostProcessor(metadataSource, accessDecisionManager);
     }
 
 }

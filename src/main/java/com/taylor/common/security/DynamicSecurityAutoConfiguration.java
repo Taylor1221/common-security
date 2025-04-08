@@ -1,7 +1,7 @@
 package com.taylor.common.security;
 
 import com.taylor.common.security.config.*;
-import com.taylor.common.security.properties.SecurityProperties;
+import com.taylor.common.security.white.SecurityProperties;
 import com.taylor.common.security.service.PermissionSourceService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

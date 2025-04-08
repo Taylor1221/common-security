@@ -1,4 +1,4 @@
-package com.taylor.common.security.properties;
+package com.taylor.common.security.white;
 
 import lombok.Getter;
 import lombok.Setter;
