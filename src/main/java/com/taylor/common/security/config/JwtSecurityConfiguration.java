@@ -1,6 +1,7 @@
 package com.taylor.common.security.config;
 
-import com.taylor.common.jwt.JwtProvider;
+import com.taylor.common.jwt.manager.JwtTokenManager;
+import com.taylor.common.jwt.provider.JwtProvider;
 import com.taylor.common.security.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +18,9 @@ public class JwtSecurityConfiguration {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(JwtProvider jwtProvider,
-                                                           UserDetailsService userDetailsService) {
-        return new JwtAuthenticationFilter(jwtProvider, userDetailsService);
+                                                           UserDetailsService userDetailsService,
+                                                           JwtTokenManager jwtTokenManager) {
+        return new JwtAuthenticationFilter(jwtProvider, userDetailsService, jwtTokenManager);
     }
 
 }

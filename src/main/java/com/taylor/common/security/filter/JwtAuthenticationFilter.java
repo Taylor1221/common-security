@@ -1,10 +1,11 @@
 package com.taylor.common.security.filter;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import com.taylor.common.jwt.manager.JwtTokenManager;
+import com.taylor.common.jwt.provider.JwtProvider;
 import com.taylor.common.web.constant.WebConstant;
 import com.taylor.common.web.domain.HttpStatus;
 import com.taylor.common.web.domain.Result;
-import com.taylor.common.jwt.JwtProvider;
 import com.taylor.common.security.support.ResponseToolKit;
 import lombok.AllArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -34,24 +35,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private UserDetailsService userDetailsService;
 
+    private JwtTokenManager jwtTokenManager;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         // 获取 Authorization 头
         String token = request.getHeader(WebConstant.AUTH_TOKEN_HEADER);
         // 检查 JWT 令牌格式
-        if (CharSequenceUtil.isEmpty(token)) {
+        if (CharSequenceUtil.isEmpty(token) || !jwtProvider.validateToken(token)) {
             filterChain.doFilter(request, response);
-            return;
-        }
-        // 验证令牌失败
-        if (!jwtProvider.validateToken(token)) {
-            ResponseToolKit.sendJsonErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    Result.reply(HttpStatus.BaseHttpStatus.UNAUTHORIZED));
             return;
         }
 
         String username = jwtProvider.getUsername(token);
+        if (!jwtTokenManager.contains(username)) {
+            ResponseToolKit.sendJsonErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    Result.reply(HttpStatus.BaseHttpStatus.UNAUTHORIZED.getCode(),
+                            "登录信息已失效，请重新登录"));
+        }
+
         // 加载用户信息
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         UsernamePasswordAuthenticationToken authentication =
