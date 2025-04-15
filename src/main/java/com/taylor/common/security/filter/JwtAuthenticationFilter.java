@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = jwtProvider.getUsername(token);
 
         // 与服务器保存的不一致
-        if (!token.equals(jwtTokenManager.getJwtToken(username))) {
+        if (!token.equals(jwtTokenManager.get(username))) {
             ResponseToolKit.sendJsonErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
                     Result.reply(HttpStatus.BaseHttpStatus.UNAUTHORIZED.getCode(),
                             "登录信息已失效，请重新登录"));
