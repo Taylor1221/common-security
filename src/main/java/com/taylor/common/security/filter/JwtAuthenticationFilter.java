@@ -1,6 +1,7 @@
 package com.taylor.common.security.filter;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import com.taylor.common.base.lock.ILock;
 import com.taylor.common.jwt.manager.JwtTokenManager;
 import com.taylor.common.jwt.provider.JwtProvider;
 import com.taylor.common.web.constant.WebConstant;
@@ -37,6 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private JwtTokenManager jwtTokenManager;
 
+    private final ILock lock;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -48,15 +51,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String username = jwtProvider.getUsername(token);
-
         // 与服务器保存的不一致
-        if (!token.equals(jwtTokenManager.get(username))) {
+        if (!jwtTokenManager.contains(token)) {
             ResponseToolKit.sendJsonErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
                     Result.reply(HttpStatus.BaseHttpStatus.UNAUTHORIZED.getCode(),
                             "登录信息已失效，请重新登录"));
             return;
         }
+
+        String username = jwtProvider.getUsername(token);
 
         // 加载用户信息
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -65,6 +68,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         // 设置身份信息
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // 该token快要过期
+        if (jwtProvider.isAboutExpired(token)) {
+            lock.lock(username);
+            try {
+                if (token.equals(jwtTokenManager.get(username))) {
+                    String newToken = jwtProvider.generateToken(username);
+                    jwtTokenManager.put(username, newToken);
+                    response.setHeader("Authorization", newToken);
+                }
+            } finally {
+                lock.unlock(username);
+            }
+        }
         filterChain.doFilter(request, response);
     }
 }
